@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
+using System.Xml;
 
 namespace cw2
 {
@@ -45,6 +47,18 @@ namespace cw2
                s.WriteStudent();
             }
 
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(Student));
+            var subReq = new Student();
+            var xml = "";
+
+            using (var sww = new StringWriter())
+            {
+                using (XmlWriter writer = XmlWriter.Create(sww))
+                {
+                    xsSubmit.Serialize(writer, hash);
+                    xml = sww.ToString(); // Your XML
+                }
+            }
 
             var parsedDate = DateTime.Parse("9.03.2020");
             Console.WriteLine(parsedDate);
