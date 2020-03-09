@@ -23,7 +23,8 @@ namespace cw2
             {
                 Console.WriteLine(line);
             }
-
+            var parsedDate = DateTime.Parse("9.03.2020");
+            Console.WriteLine(parsedDate);
             var now = DateTime.UtcNow;
             Console.WriteLine(now);
             var today = DateTime.Today;
