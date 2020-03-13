@@ -16,15 +16,16 @@ namespace cw2
             createLog();
 
             //Standart values
-            string path = @"C:\Users\lol\Desktop\dane.csv";
-            string save = @"dane";
-            string format = "xml";
+            string path = @"data.csv";
+            string save = @"rezult";
+            string format = "json";
             try
             {
                 path = args[0];
-            } catch (IndexOutOfRangeException)
+            }
+            catch (IndexOutOfRangeException)
             {
-                Log("Use standart Path: " + path); 
+                Log("Use standart Path: " + path);
             }
 
             try
@@ -79,6 +80,16 @@ namespace cw2
             {
                 Log("File not found");
             }
+            //Counting
+            Dictionary<string, int> activeStudnets = new Dictionary<string, int>();
+            foreach (var s in hash)
+            {
+                if (!activeStudnets.ContainsKey(s.studies.name))
+                    activeStudnets.Add(s.studies.name, 1);
+                else
+                    activeStudnets[s.studies.name]++;
+            }
+
             //XML
             if (format.Equals("xml"))
             {
@@ -89,7 +100,9 @@ namespace cw2
             //JSON
             if (format.Equals("json"))
             {
-                var js = JsonConvert.SerializeObject(hash, Formatting.Indented);
+                University university = new University(hash, activeStudnets);
+
+                var js = JsonConvert.SerializeObject(university, Formatting.Indented);
                 File.WriteAllText(save + ".json", js);
             }
         }
