@@ -18,7 +18,7 @@ namespace cw2
             //Standart values
             string path = @"data.csv";
             string save = @"rezult";
-            string format = "json";
+            string format = "xml";
             try
             {
                 path = args[0];
