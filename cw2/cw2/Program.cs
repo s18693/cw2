@@ -2,87 +2,109 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using System.Xml;
+using Newtonsoft.Json;
+
+//using System.Xml;
 
 namespace cw2
 {
     class Program
     {
-        //Podajemy 3 argumenty
-        //Zrobić do końca piątku
-        //hashSet zeby nie było duplikatów
-        //jaison
-        //IEnumerable -> ICollection -> Ilist
-        //IEnumerable -> IQueryable INHERITANCE
-
         static void Main(string[] args)
         {
-            //var path = @"C:\Users\jd\Desktop\dane.csv";
-            var path = @"C:\Users\s18693\Desktop\dane.csv";
-            //var path = @"C:\Users\s18693\Desktop";
+            //Create blanck log
+            createLog();
 
-            var lines = File.ReadLines(path);
-            /*
-            foreach (var line in lines)
+            //Standart values
+            string path = @"C:\Users\lol\Desktop\dane.csv";
+            string save = @"dane";
+            string format = "xml";
+            try
             {
-                Console.WriteLine(line);
+                path = args[0];
+            } catch (IndexOutOfRangeException)
+            {
+                Log("Use standart Path: " + path); 
             }
-            */
+
+            try
+            {
+                save = args[1];
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Log("Use standart Save: " + save);
+            }
+
+            try
+            {
+                format = args[2];
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Log("Use standart Format: " + format);
+            }
+
+            //read students
             var hash = new HashSet<Student>(new OwnComparer());
-            //var compier = new OwnComparer();
-            using (var stream = new StreamReader(path))
+            try
             {
-                string line = null;
-                while ((line = stream.ReadLine()) != null)
+                using (var stream = new StreamReader(path))
                 {
-                    string[] student = line.Split(',');
-                    var st = new Student { fname = student[0], lname = student[1] };
-                    hash.Add(st);
-                    //st.WriteStudent();
+                    string line = null;
+                    while ((line = stream.ReadLine()) != null)
+                    {
+                        string[] read = line.Split(',');
+
+                        bool ok = true;
+                        foreach (var tmp in read)
+                            if (tmp.Equals(""))
+                            {
+                                Log("NULL value, student dismiss");
+                                ok = false;
+                            }
+                        if (ok)
+                            if (read.Length == 9)
+                            {
+                                var readStudies = new Studies { name = read[2], mode = read[3] };
+                                var st = new Student { fname = read[0], lname = read[1], indexNumber = read[4], birthdate = read[5], email = read[6], mothersName = read[7], fathersName = read[8], studies = readStudies };
+                                hash.Add(st);
+                            }
+                            else
+                                Log("Not correct informations. Find: " + read.Length + " Need: 9");
+                    }
                 }
             }
-
-            foreach (var s in hash)
+            catch (FileNotFoundException)
             {
-               s.WriteStudent();
+                Log("File not found");
             }
-
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(Student));
-            var subReq = new Student();
-            var xml = "";
-
-            using (var sww = new StringWriter())
+            //XML
+            if (format.Equals("xml"))
             {
-                using (XmlWriter writer = XmlWriter.Create(sww))
-                {
-                    xsSubmit.Serialize(writer, hash);
-                    xml = sww.ToString(); // Your XML
-                }
+                XmlSerializer serializer = new XmlSerializer(typeof(HashSet<Student>), new XmlRootAttribute(@"uczelnia Created At " + DateTime.Now + new XmlRootAttribute("Author: Jan Kowalski")));
+                FileStream writer = new FileStream(save + ".xml", FileMode.Create);
+                serializer.Serialize(writer, hash);
             }
+            //JSON
+            if (format.Equals("json"))
+            {
+                var js = JsonConvert.SerializeObject(hash, Formatting.Indented);
+                File.WriteAllText(save + ".json", js);
+            }
+        }
 
-            var parsedDate = DateTime.Parse("9.03.2020");
-            Console.WriteLine(parsedDate);
-            var now = DateTime.UtcNow;
-            Console.WriteLine(now);
-            var today = DateTime.Today;
-            Console.WriteLine(today);
-            Console.WriteLine(today.ToShortDateString());
-
-
-
-            /*
-             .Netonsoft.JSON JSONConvert.SerializableObject();
-             Student:{
-             fuirstName: "Ala" 
-             }
-             [JSONProperty("created")]
-             Utworzono()
-
-
-             */
-
-
-
+        public static void createLog()
+        {
+            StreamWriter log = new StreamWriter(@"log.txt");
+            log.Close();
+        }
+        public static void Log(string msg)
+        {
+            StreamWriter log = new StreamWriter(@"log.txt", append: true);
+            log.WriteLine("[" + DateTime.Now + "] " + msg);
+            log.Flush();
+            log.Close();
         }
     }
 }

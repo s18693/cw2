@@ -4,7 +4,7 @@ using System.Text;
 
 namespace cw2
 {
-    class Studies
+    public class Studies
     {
         public string name { get; set; }
         public string mode { get; set; }
